@@ -165,7 +165,7 @@ class SpineComponent(Component):
         # Add Splice Ops
         # ===============
         # Add Splice Op
-        bezierSpineSpliceOp = SpliceOperator("spineSpliceOp", "BezierSpineSolver", "Kraken")
+        bezierSpineSpliceOp = SpliceOperator("spineSpliceOp", "BezierSpineSolver", "KrakenSolvers")
         self.addOperator(bezierSpineSpliceOp)
 
         # Add Att Inputs
@@ -186,7 +186,7 @@ class SpineComponent(Component):
         bezierSpineSpliceOp.evaluate()
 
         # Add Deformer Splice Op
-        outputsToDeformersSpliceOp = SpliceOperator("spineDeformerSpliceOp", "MultiPoseConstraintSolver", "Kraken")
+        outputsToDeformersSpliceOp = SpliceOperator("spineDeformerSpliceOp", "MultiPoseConstraintSolver", "KrakenSolvers")
         self.addOperator(outputsToDeformersSpliceOp)
 
         # Add Att Inputs

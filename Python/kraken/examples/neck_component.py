@@ -115,7 +115,7 @@ class NeckComponent(Component):
         # Add Splice Ops
         # ===============
         #Add Deformer Splice Op
-        spliceOp = SpliceOperator("neckDeformerSpliceOp", "PoseConstraintSolver", "Kraken")
+        spliceOp = SpliceOperator("neckDeformerSpliceOp", "PoseConstraintSolver", "KrakenSolvers")
         self.addOperator(spliceOp)
 
         # Add Att Inputs

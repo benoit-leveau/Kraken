@@ -28,8 +28,8 @@ class SpliceOperator(Operator):
 
         # Load the Fabric Engine client and construct the RTVal for the Solver
         ks.loadCoreClient()
-        ks.loadExtension('Kraken')
-        if self.extension != 'Kraken':
+        ks.loadExtension('KrakenSolvers')
+        if self.extension != 'KrakenSolvers':
             ks.loadExtension(self.extension)
         self.solverRTVal = ks.constructRTVal(self.solverTypeName)
         self.args = self.solverRTVal.getArguments('KrakenSolverArg[]')
@@ -90,7 +90,7 @@ class SpliceOperator(Operator):
 
         # Start constructing the source code.
         opSourceCode = ""
-        opSourceCode += "require Kraken;\n"
+        opSourceCode += "require KrakenSolvers;\n"
         opSourceCode += "require " + self.getExtension() + ";\n\n"
         opSourceCode += "operator " + self.getName() + "(\n"
 

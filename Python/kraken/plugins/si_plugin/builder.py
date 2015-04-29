@@ -380,7 +380,6 @@ class Builder(Builder):
 
         """
 
-        parentDCCSceneItem = self._getDCCSceneItem(kAttributeGroup.getParent())
 
         groupName = kAttributeGroup.getName()
         if groupName == "" and kAttributeGroup.getNumAttributes() < 1:
@@ -389,6 +388,7 @@ class Builder(Builder):
         if groupName == "":
             groupName = "Settings"
 
+        parentDCCSceneItem = self._getDCCSceneItem(kAttributeGroup.getParent())
         dccSceneItem = parentDCCSceneItem.AddProperty("CustomParameterSet", False, groupName)
         self._registerSceneItemPair(kAttributeGroup, dccSceneItem)
 
@@ -496,7 +496,7 @@ class Builder(Builder):
 
             # Load the Fabric Engine client and construct the RTVal for the Solver
             ks.loadCoreClient()
-            ks.loadExtension('Kraken')
+            ks.loadExtension('KrakenSolvers')
             solverTypeName = 'PoseConstraintSolver'
             target = constraineeDCCSceneItem.FullName + ".kine.global"
             spliceOpPath = target + ".SpliceOp"
@@ -527,7 +527,7 @@ class Builder(Builder):
 
             # Generate the operator source code.
             opSourceCode = ""
-            opSourceCode += "require Kraken;\n"
+            opSourceCode += "require KrakenSolvers;\n"
             opSourceCode += "operator poseConstraint(\n"
             opSourceCode += "    io " + solverTypeName + " solver,\n"
             opSourceCode += "    in Boolean debug,\n"

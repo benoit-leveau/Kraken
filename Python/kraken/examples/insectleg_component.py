@@ -222,7 +222,7 @@ class InsectLegComponent(Component):
         # Add Splice Ops
         # ===============
         # Add Splice Op
-        spliceOp = SpliceOperator("legSpliceOp", "NBoneIKSolver", "Kraken")
+        spliceOp = SpliceOperator("legSpliceOp", "NBoneIKSolver", "KrakenSolvers")
         self.addOperator(spliceOp)
 
         # # Add Att Inputs
@@ -249,7 +249,7 @@ class InsectLegComponent(Component):
         spliceOp.setOutput("legEnd", legEndPosOutput)
 
         # Add Deformer Splice Op
-        outputsToDeformersSpliceOp = SpliceOperator("spineDeformerSpliceOp", "MultiPoseConstraintSolver", "Kraken")
+        outputsToDeformersSpliceOp = SpliceOperator("spineDeformerSpliceOp", "MultiPoseConstraintSolver", "KrakenSolvers")
         self.addOperator(outputsToDeformersSpliceOp)
 
         # Add Att Inputs
