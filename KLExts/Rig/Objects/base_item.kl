@@ -1,0 +1,114 @@
+// Kraken - objects.scene_item module.
+
+// Classes:
+// BaseItem - Base BaseItem Object.
+
+//
+interface IBaseItem {
+    String getTypeName();
+    String[] getTypeHierarchyNames();
+}
+
+
+object BaseItem;
+object BaseItem(object){
+    //Kraken base object type for any 3D object.//
+    String name;
+    BaseItem parent;
+}
+
+
+function BaseItem.init(String name){
+    this.name = name
+}
+
+function BaseItem.init(String name, BaseItem parent){
+    this.name = name
+    this.parent = parent
+}
+
+// ==============
+// Type Methods
+// ==============
+function String BaseItem.getTypeName(){
+    // Returns the class name of this object.
+
+    // Return:
+    // True if successful.
+
+    return this.type()
+}
+
+function String[] BaseItem.getTypeHierarchyNames(){
+    //Returns the class name of this object.
+
+    // Return:
+    // True if successful.
+    String hierarchy[];
+    hierarchy.push(((IBaseItem)this).getTypeName())
+    return hierarchy
+}
+
+function BaseItem.isTypeOf(String typeName){
+    //Returns the class name of this object.
+
+    // Return:
+    // True if the scene item is of the given type.
+
+    String hierarchy[] = ((IBaseItem)this).getTypeHierarchyNames();
+    for(i =0; i<hierarchy.size; i++){
+        if(hierarchy[i] == typeName)
+            return true;
+    }
+    return false
+}
+
+// =============
+// Name methods
+// =============
+function BaseItem.getName(){
+    //Returns the name of the object as a string.
+
+    // Return:
+    // String of the object's name.
+
+    return this.name;
+}
+
+function BaseItem.getFullName(){
+    //Returns the full hierarchical path to this object.
+
+    // Return:
+    // String, full name of the object.
+
+    if(this.parent)
+        return this.parent.getFullName() + String('.') + this.getName();
+
+    return this.getName();
+}
+
+// ===============
+// Parent Methods
+// ===============
+function BaseItem.getParent(){
+    //Returns the parent of the object as an object.
+
+    // Return:
+    // Parent of this object.
+
+    return this.parent;
+}
+
+function BaseItem.setParent(BaseItem parent){
+    //Sets the parent attribute of this object.
+
+    // Arguments:
+    // parent -- Object, object that is the parent of this one.
+
+    // Return:
+    // True if successful.
+
+    this.parent = parent;
+
+    return True
+}

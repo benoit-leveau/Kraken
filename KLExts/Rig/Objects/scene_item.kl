@@ -1,0 +1,946 @@
+//Kraken - objects.scene_item module.
+
+// Classes:
+// SceneItem - Base SceneItem Object.
+
+// //
+
+// from kraken.core.maths.xfo import Xfo
+// from kraken.core.objects.attributes.attribute_group import AttributeGroup
+// from base_item import BaseItem
+
+object Component;
+object AttributeGroup;
+object Constraint;
+
+object SceneItem(BaseItem) {
+    //Kraken base object type for any 3D object.//
+    Component component;
+    SceneItem children[];
+    UInt32 flags;
+    AttributeGroup attributeGroups[];
+    Constraint constraints[];
+    Xfo xfo;
+    Color color;
+    Boolean visibility;
+    Boolean shapeVisibility;
+
+}
+
+function SceneItem(SceneItem parent){
+    this.init(parent);
+}
+
+function SceneItem.init(SceneItem parent){
+    this.parent.init(parent);
+    if(parent != None)
+        parent.addChild(this)
+    AttributeGroup defaultAttrGroup("");
+    this.addAttributeGroup(defaultAttrGroup);
+    this.shapeVisibility = True
+}
+
+
+// ==================
+// Hierarchy Methods
+// ==================
+function getContainer(){
+    // Returns the Container the object belongs to.
+    // Return:
+    // Object, Container.
+
+    parent = this.getParent()
+    while (parent and 'Container' not in parent.getTypeHierarchyNames())
+        parent = parent.getParent()
+
+    return parent
+}
+
+function getLayer(){
+    // Returns the Layer the object belongs to.
+    // Return:
+    // Object, Layer this object belongs to.
+
+    parent = this.getParent();
+    while (parent &! parent.isTypeOf('Layer'))
+        parent = parent.getParent();
+
+    return parent;
+}
+
+/*
+    // ==================
+    // Component Methods
+    // ==================
+function getComponent():
+        //Returns the component of the object as an object.
+
+        Return:
+        Component of this object.
+
+        //
+
+        return this.component
+
+
+function setComponent(component):
+        //Sets the component attribute of this object.
+
+        Arguments:
+        component -- Object, object that is the component of this one.
+
+        Return:
+        True if successful.
+
+        //
+
+        this.component = component
+
+        return true
+
+
+    // ==============
+    // Child Methods
+    // ==============
+function checkChildIndex(index):
+        //Checks the supplied index is valid.
+
+        Arguments:
+        index -- Integer, child index to check.
+
+        //
+
+        if index > len(this.children):
+            raise IndexError("'" + str(index) + "' is out of the range of the 'children' array.")
+
+        return true
+
+
+function addChild(child):
+        //Adds a child to this object.
+
+        Arguments:
+        child -- Object, object that will be a child of this object.
+
+        Return:
+        True if successful.
+
+        //
+
+        // TODO: Attempted to check for types, but still running into issues
+        // throughout the hierarchy. Need to find a better solution. Possibly have
+        // the children attribute a dictionary sorted by types and check there. But
+        // will still run into clashes. Need another differentiating attribute on
+        // all objects.
+
+        // if child.getName() in [x.getName() for x in this.children]:
+
+        //     if child.isTypeOf("BaseComponent"):
+        //         existingChild = this.getChildByName(child.getName())
+        //         if child.getTypeName() == existingChild.getTypeName() and child.getLocation() == existingChild.getLocation():
+        //             raise NameError("Child with name '" + child.getFullName() + "', type: '" + child.getTypeName() + "', and location: '" + child.getLocation() + "' already exists.")
+        //     else:
+        //         existingChild = this.getChildByName(child.getName())
+        //         if child.getTypeName() == existingChild.getTypeName():
+        //             raise NameError("Child with name '" + child.getFullName() + "' and type: '" + child.getTypeName() + "' already exists.")
+
+        if child.getParent():
+            parent = child.getParent()
+            if child in parent.children:
+                parent.children.remove(child)
+
+        this.children.append(child)
+        child.setParent(this)
+
+        // Assign the child the same component.
+        if this.component:
+            child.setComponent(this.component)
+
+        return true
+
+
+function removeChildByIndex(index):
+        //Removes a child from this object by index.
+
+        Arguments:
+        index -- Integer, index of child to remove.
+
+        Return:
+        True if successful.
+
+        //
+
+        if this.checkChildIndex(index) is not True:
+            return False
+
+        del this.children[index]
+
+        return true
+
+
+function removeChildByName(name):
+        //Removes a child from this object by name.
+
+        Arguments:
+        name -- String, name of child to remove.
+
+        Return:
+        True if successful.
+
+        //
+
+        removeIndex = None
+
+        for i, eachChild in enumerate(this.children):
+            if eachChild.getName() == name:
+                removeIndex = i
+
+        if removeIndex is None:
+            raise ValueError("'" + name + "' is not a valid child of this object.")
+
+        this.removeChildByIndex(removeIndex)
+
+        return true
+
+
+function getNumChildren():
+        //Returns the number of children this object has.
+
+        Return:
+        Integer, number of children of this object.
+
+        //
+
+        return len(this.children)
+
+
+function getChildByIndex(index):
+        //Returns the child object at specified index.
+
+        Arguments:
+        index -- Integer, index of the child to find.
+
+        Return:
+        Child object at specified index.
+
+        //
+
+        if this.checkChildIndex(index) is not True:
+            return False
+
+        return this.children[index]
+
+
+function getChildByName(name):
+        //Returns the child object with the specified name.
+
+        Return:
+        Object if found.
+        None if not found.
+
+        //
+
+        for eachChild in this.children:
+            if eachChild.getName() == name:
+                return eachChild
+
+        return None
+
+
+function getChildrenByType(childType):
+        //Returns all children that are of the specified type.
+
+        Arguments:
+        childType -- String, type of children to find.
+
+        Return:
+        Array of child objects of the specified type.
+        None if no objects of specified type are found.
+
+        //
+
+        childrenOfType = []
+        for eachChild in this.children:
+            if type(eachChild).__name__ is childType:
+                childrenOfType.append(eachChild)
+
+        return childrenOfType
+
+
+function findChild(name, targetObj=None):
+        //Finds a child by recursively searching the hierarhcy for a child with
+        the given name.
+
+        Arguments:
+        name -- String, name of the child to find.
+        targetObj -- Object, object to search under. Used for recursive searching.
+
+        Return:
+        Object, child if found.
+
+        //
+
+        foundChild = None
+
+        if targetObj == None:
+            targetObj = this
+
+        // Build children
+        for i in xrange(targetObj.getNumChildren()):
+            child = targetObj.getChildByIndex(i)
+
+            if child.getName() == name:
+                foundChild = child
+            else:
+                foundChild = this.findChild(name, child)
+
+            if foundChild:
+                break
+
+        return foundChild
+
+
+function findChildrenByType(childType, targetObj=None):
+        //Finds a child by recursively searching the hierarhcy for a child with
+        the given name.
+
+        Arguments:
+        childType -- String, type of children to find.
+        targetObj -- Object, object to search under. Used for recursive searching.
+
+        Return:
+        List, children of the searched type if found.
+
+        //
+
+        childrenOfType = []
+
+        this._findChildByType(childType, childrenOfType)
+
+        return childrenOfType
+
+
+function _findChildByType(childType, foundArray, targetObj=None):
+        //Protected find child by type method.
+
+        Arguments:
+        childType -- Class, type of children to find.
+        foundArray -- List, list of found children to append to.
+        targetObj -- Object, object to search under. Used for recursive searching.
+
+        Return:
+        True if successful.
+
+        //
+
+        if targetObj == None:
+            targetObj = this
+
+        // Build children
+        for i in xrange(targetObj.getNumChildren()):
+            child = targetObj.getChildByIndex(i)
+
+            if type(child).__name__ is childType:
+                foundArray.append(child)
+
+            newFoundChildren = this._findChildByType(childType, foundArray, child)
+
+        return
+
+
+    // =============
+    // Flag Methods
+    // =============
+function setFlag(name):
+        //Sets the flag of the specified name.
+
+        Return:
+        True if successful.
+
+        //
+
+        this.flags[name] = True
+
+        return true
+
+
+function testFlag(name):
+        //Tests if the specified flag is set.
+
+        Arguments:
+        name -- String, name of the flag to test.
+
+        Return:
+        True if flag is set, false otherwise.
+
+        //
+
+        if name in this.flags:
+            return true
+
+        return False
+
+
+function clearFlag(name):
+        //Clears the flag of the specified name.
+
+        Arguments:
+        name -- String, name of the flag to clear.
+
+        Return:
+        True if successful.
+
+        //
+
+        if name in this.flags:
+            del this.flags[name]
+            return true
+
+        return False
+
+
+    // ========================
+    // Attribute Group Methods
+    // ========================
+function checkAttributeGroupIndex(index):
+        //Checks the supplied index is valid.
+
+        Arguments:
+        index -- Integer, attribute index to check.
+
+        Return:
+        True if successful.
+
+        //
+
+        if index > len(this.attributeGroups):
+            raise IndexError("'" + str(index) + "' is out of the range of 'attributeGroups' array.")
+
+        return true
+
+
+function addAttributeGroup(attributeGroup):
+        //Adds an attributeGroup to this object.
+
+        Arguments:
+        attributeGroup -- Object, Attribute Group object to add to this object.
+
+        Return:
+        True if successful.
+
+        //
+
+        if attributeGroup.getName() in [x.getName() for x in this.attributeGroups]:
+            raise IndexError("Child with " + attributeGroup.getName() + " already exists as a attributeGroup.")
+
+        this.attributeGroups.append(attributeGroup)
+        attributeGroup.setParent(this)
+
+        return true
+
+
+function removeAttributeGroupByIndex(index):
+        //Removes attribute at specified index.
+
+        Arguments:
+        index -- Integer, index of attribute to remove.
+
+        Return:
+        True if successful.
+
+        //
+
+        if this.checkAttributeGroupIndex(index) is not True:
+            return False
+
+        del this.attributeGroups[index]
+
+        return true
+
+
+function removeAttributeGroupByName(name):
+        //Removes the attribute with the specified name.
+
+        Arguments:
+        name -- String, name of the attribute to remove.
+
+        Return:
+        True if successful.
+
+        //
+
+        removeIndex = None
+
+        for i, eachAttributeGroup in enumerate(this.attributeGroups):
+            if eachAttributeGroup.getName() == name:
+                removeIndex = i
+
+        if removeIndex is None:
+            return False
+
+        this.removeAttributeGroupByIndex(removeIndex)
+
+        return true
+
+
+function getNumAttributeGroups():
+        //Returns the number of attributeGroups as an integer.
+
+        Return:
+        Integer of the number of attributeGroups on this object.
+
+        //
+
+        return len(this.attributeGroups)
+
+
+function getAttributeGroupByIndex(index):
+        //Returns the attribute at the specified index.
+
+        Arguments:
+        index -- Integer, index of the attribute to return.
+
+        Return:
+        AttributeGroup at the specified index.
+        False if not a valid index.
+
+        //
+
+        if this.checkAttributeGroupIndex(index) is not True:
+            return False
+
+        return this.attributeGroups[index]
+
+
+function getAttributeGroupByName(name):
+        //Return the attribute group with the specified name.
+
+        Arguments:
+        name -- String, name of the attribute group to return.
+
+        Return:
+        Attribute with the specified name.
+        None if not found.
+
+        //
+
+        for eachAttributeGroup in this.attributeGroups:
+            if eachAttributeGroup.getName() == name:
+                return eachAttributeGroup
+
+        return None
+
+
+    // ===================
+    // Constraint Methods
+    // ===================
+function checkConstraintIndex(index):
+        //Checks the supplied index is valid.
+
+        Arguments:
+        index -- Integer, constraint index to check.
+
+        Return:
+        True if successful.
+
+        //
+
+        if index > len(this.constraints):
+            raise IndexError("'" + str(index) + "' is out of the range of 'constraints' array.")
+
+        return true
+
+
+function addConstraint(constraint):
+        //Adds an constraint to this object.
+
+        Arguments:
+        constraint -- Object, Constraint object to add to this object.
+
+        Return:
+        True if successful.
+
+        //
+
+        if constraint.getName() in [x.getName() for x in this.constraints]:
+            raise IndexError("Constraint with name '" + constraint.getName() + "'' already exists as a constraint.")
+
+        this.constraints.append(constraint)
+        constraint.setParent(this)
+        constraint.setConstrainee(this)
+
+        return true
+
+
+function removeConstraintByIndex(index):
+        //Removes constraint at specified index.
+
+        Arguments:
+        index -- Integer, index of constraint to remove.
+
+        Return:
+        True if successful.
+
+        //
+
+        if this.checkConstraintIndex(index) is not True:
+            return False
+
+        del this.constraints[index]
+
+        return true
+
+
+function removeConstraintByName(name):
+        //Removes the constraint with the specified name.
+
+        Arguments:
+        name -- String, name of the constraint to remove.
+
+        Return:
+        True if successful.
+
+        //
+
+        removeIndex = None
+
+        for i, eachConstraint in enumerate(this.constraints):
+            if eachConstraint.getName() == name:
+                removeIndex = i
+
+        if removeIndex is None:
+            return False
+
+        this.removeConstraintByIndex(removeIndex)
+
+        return true
+
+
+function getNumConstraints():
+        //Returns the number of constraints as an integer.
+
+        Return:
+        Integer of the number of constraints on this object.
+
+        //
+
+        return len(this.constraints)
+
+
+function getConstraintByIndex(index):
+        //Returns the constraint at the specified index.
+
+        Arguments:
+        index -- Integer, index of the constraint to return.
+
+        Return:
+        Constraint at the specified index.
+        False if not a valid index.
+
+        //
+
+        if this.checkConstraintIndex(index) is not True:
+            return False
+
+        return this.constraints[index]
+
+
+function getConstraintByName(name):
+        //Return the constraint group with the specified name.
+
+        Arguments:
+        name -- String, name of the constraint group to return.
+
+        Return:
+        Attribute with the specified name.
+        None if not found.
+
+        //
+
+        for eachConstraint in this.constraints:
+            if eachConstraint.getName() == name:
+                return eachConstraint
+
+        return None
+
+
+*/
+// ===================
+// Constraint Methods
+// ===================
+
+
+
+function SceneItem.addOperator!(Operator op){
+    //Adds an op to this object.
+
+    // Arguments:
+    // op -- Object, op object to add to this object.
+
+    // Return:
+    // True if successful.
+
+    //
+
+    this.operators.push(op);
+
+    return true
+}
+/*
+
+    // ===================
+    // Visibility Methods
+    // ===================
+function getVisibility():
+        //Returns the visibility status of the scene item.
+
+        Return:
+        Boolean, visible or not.
+
+        //
+
+        return this.visibility
+
+
+function setVisibility(value):
+        //Sets the visibility of the scene object.
+
+        Arguments:
+        value -- Boolean, value of the visibility of the object.
+
+        Return:
+        True if successful.
+
+        //
+
+        this.visibility = value
+
+        return true
+
+
+function getShapeVisibility():
+        //Returns the shape visibility status of the scene item.
+
+        Return:
+        Boolean, visible or not.
+
+        //
+
+        return this.shapeVisibility
+
+
+function setShapeVisibility(value):
+        //Sets the shape visibility of the scene object.
+
+        Arguments:
+        value -- Boolean, value of the visibility of the object.
+
+        Return:
+        True if successful.
+
+        //
+
+        this.shapeVisibility = value
+
+        return true
+
+
+    // ================
+    // Display Methods
+    // ================
+function setColor(color):
+        //Sets the color of this object.
+
+        Arguments:
+        color -- String, name of the color you wish to set.
+
+        Return:
+        True if successful.
+
+        //
+
+        this.color = color
+
+        return true
+
+
+function getColor():
+        //Returns the color of the object.
+
+        Return:
+        String, color of the object.
+
+        //
+
+        return this.color
+
+
+    // ==================
+    // Transform Methods
+    // ==================
+function lockAttribute(attributeName):
+        pass
+
+
+function unlockAttribute(attributeName):
+        pass
+
+
+function hideAttribute(attributeName):
+        pass
+
+
+function unhideAttribute(attributeName):
+        pass
+
+
+    // ==========================
+    // Parameter Locking Methods
+    // ==========================
+function lockRotation(x=False, y=False, z=False):
+        //Sets flags for locking rotation parameters.
+
+        Arguments:
+        x -- Boolean, lock x axis.
+        y -- Boolean, lock y axis.
+        z -- Boolean, lock z axis.
+
+        Return:
+        True if successful.
+
+        //
+
+        if x is True:
+            this.setFlag("lockXRotation")
+
+        if y is True:
+            this.setFlag("lockYRotation")
+
+        if z is True:
+            this.setFlag("lockZRotation")
+
+
+function lockScale(x=False, y=False, z=False):
+        //Sets flags for locking scale parameters.
+
+        Arguments:
+        x -- Boolean, lock x axis.
+        y -- Boolean, lock y axis.
+        z -- Boolean, lock z axis.
+
+        Return:
+        True if successful.
+
+        //
+
+        if x is True:
+            this.setFlag("lockXScale")
+
+        if y is True:
+            this.setFlag("lockYScale")
+
+        if z is True:
+            this.setFlag("lockZScale")
+
+
+function lockTranslation(x=False, y=False, z=False):
+        //Sets flags for locking translation parameters.
+
+        Arguments:
+        x -- Boolean, lock x axis.
+        y -- Boolean, lock x axis.
+        z -- Boolean, lock x axis.
+
+        Return:
+        True if successful.
+
+        //
+
+        if x is True:
+            this.setFlag("lockXTranslation")
+
+        if y is True:
+            this.setFlag("lockYTranslation")
+
+        if z is True:
+            this.setFlag("lockZTranslation")
+
+
+    // ====================
+    // Persistence Methods
+    // ====================
+function jsonEncode(saver):
+        //Returns the data for this object encoded as a JSON hierarchy.
+
+        Arguments:
+
+        Return:
+        A JSON structure containing the data for this SceneItem.
+
+        //
+
+        classHierarchy = this.getTypeHierarchyNames()
+
+        jsonData = {
+            '__typeHierarchy__': classHierarchy,
+            'name': this.name,
+            'parent': None,
+            'children': [],
+            'flags': this.flags,
+            'attributeGroups': [],
+            'constraints': [],
+            'xfo': this.xfo.jsonEncode(),
+            'color': this.color,
+            'visibility': this.visibility,
+            'shapeVisibility': this.shapeVisibility,
+        }
+
+        if this.parent:
+            jsonData['parent'] = this.parent.getName()
+
+        if this.color:
+            jsonData['color'] = saver.encodeValue(this.color)
+
+        for child in this.children:
+            jsonData['children'].append(child.jsonEncode(saver))
+
+        for attrGroup in this.attributeGroups:
+            jsonData['attributeGroups'].append(attrGroup.jsonEncode(saver))
+
+        for constr in this.constraints:
+            jsonData['constraints'].append(constr.jsonEncode(saver))
+
+        return jsonData
+
+
+function jsonDecode(loader, jsonData):
+        //Returns the color of the object.
+
+        Return:
+        True if decoding was successful
+
+        //
+        this.flags =  jsonData['flags']
+        this.xfo =  loader.decodeValue(jsonData['xfo'])
+        if 'color' in jsonData and jsonData['color']:
+            this.color =  loader.decodeValue(jsonData['color'])
+        this.visibility =  jsonData['visibility']
+        this.shapeVisibility =  jsonData['shapeVisibility']
+
+        for child in jsonData['children']:
+            this.addChild(loader.construct(child))
+
+        for attrGroup in jsonData['attributeGroups']:
+            // There is one default attribute group assigned to each scene item.
+            // Load data into the existing item instead of constructing a new one.
+            if attrGroup['name'] == '':
+                loader.registerItem(this.attributeGroups[0])
+                this.attributeGroups[0].jsonDecode(loader, attrGroup)
+            else:
+                this.addAttributeGroup(loader.construct(attrGroup))
+
+        for constr in jsonData['constraints']:
+            this.addConstraint(loader.construct(constr))
+
+        return true
+*/

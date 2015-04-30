@@ -1,0 +1,32 @@
+//Kraken - objects.scene_item module.
+
+// Classes:
+// SceneItem - Base SceneItem Object.
+
+// //
+
+// from kraken.core.maths.xfo import Xfo
+// from kraken.core.objects.attributes.attribute_group import AttributeGroup
+// from base_item import BaseItem
+
+
+
+object KrakenOperator() {
+	Parameter inargs[String];
+	Parameter ioargs[String]
+    Solver solver;
+}
+
+
+// Evaluate the solver using the given args
+function KrakenOperator.evaluate(Scalar time){
+	Param inargs[String];
+	Param ioargs[String];
+    for(key, param in this.inargs)
+        inargs[key] = param.getValue();
+    for(key, param in this.ioargs)
+        ioargs[key] = param.getValue();
+   	this.solver.evaluate(inargs, ioargs)
+    for(key, param in this.ioargs)
+        ioargs[key] = param.getValue();
+}
