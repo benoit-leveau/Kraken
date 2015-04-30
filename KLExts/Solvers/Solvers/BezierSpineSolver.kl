@@ -136,3 +136,16 @@ function BezierSpineSolver.solve!
   }
   */
 }
+
+// Evaluate the solver using the given args
+function KrakenSolver.evaluate(Param inargs[String], io Param ioargs[String]){
+  this.solve(
+    BooleanParam(inargs['debug']).getValue(),
+    Float64Param(inargs['length']).getValue(),
+    Mat44Param(inargs['base']).getValue(),
+    Mat44Param(inargs['baseHandle']).getValue(),
+    Mat44Param(inargs['tipHandle']).getValue(),
+    Mat44Param(inargs['tip']).getValue(),
+    Mat44ArrayParam(ioargs['outputs']).getValue()
+  );
+}

@@ -1,7 +1,9 @@
 require InlineDrawing;
+require Parameters;
 
 interface IKrakenSolver {
     KrakenSolverArg[] getArguments();
+    evaluate(Param inargs[String], io Param ioargs[String]);
 };
 
 object KrakenSolver : IKrakenSolver {
@@ -20,6 +22,11 @@ function KrakenSolverArg[] KrakenSolver.getArguments(){
     KrakenSolverArg args[];
     args.push(KrakenSolverArg('debug', 'in', 'Boolean'));
     return args;
+}
+
+// Evaluate the solver using the given args
+function KrakenSolver.evaluate(Param inargs[String], io Param ioargs[String]){
+    throw("Derived Solvers must implement this method to work in a pure KL rig.");
 }
 
 function KrakenSolver.setDebug!(in Boolean active) {
