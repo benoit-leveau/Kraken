@@ -137,6 +137,36 @@ class Builder(object):
         return None
 
 
+    def buildComponent(self, kSceneItem, buildName):
+        """Builds a component object.
+
+        Arguments:
+        kSceneItem -- Object, kSceneItem that represents a group to be built.
+        buildName -- String, The name to use on the built object.
+
+        Return:
+        DCC Scene Item that is created.
+
+        """
+
+        return self.buildGroup()
+
+
+    def buildSrtBuffer(self, kSceneItem, buildName):
+        """Builds a component object.
+
+        Arguments:
+        kSceneItem -- Object, kSceneItem that represents a group to be built.
+        buildName -- String, The name to use on the built object.
+
+        Return:
+        DCC Scene Item that is created.
+
+        """
+
+        return self.buildGroup()
+
+
     def buildJoint(self, kSceneItem, buildName):
         """Builds a joint object.
 
@@ -554,14 +584,14 @@ class Builder(object):
             dccSceneItem = self.buildLayer(kObject, buildName)
 
         elif kObject.isTypeOf("Component"):
-            dccSceneItem = self.buildGroup(kObject, buildName)
+            dccSceneItem = self.buildComponent(kObject, buildName)
             component = kObject
 
         elif kObject.isTypeOf("HierarchyGroup"):
             dccSceneItem = self.buildHierarchyGroup(kObject, buildName)
 
         elif kObject.isTypeOf("SrtBuffer"):
-            dccSceneItem = self.buildGroup(kObject, buildName)
+            dccSceneItem = self.buildSrtBuffer(kObject, buildName)
 
         elif kObject.isTypeOf("Locator"):
             dccSceneItem = self.buildLocator(kObject, buildName)
