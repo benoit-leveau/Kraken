@@ -737,6 +737,8 @@ class Builder(Builder):
                         else:
                             parameter.AddExpression(dccSceneItem.FullName)
 
+            si.fabricSplice("setPortPersistence", spliceOpPath, '{"portName":"solver", "persistence":true }', "")
+
 
             arraySizes = {}
             # connect the operator to the objects in the DCC
